@@ -12,14 +12,19 @@ const GET_MOVIE = gql`
       description_full
       language
     }
+    suggestionMovies(id: $id) {
+      id
+      medium_cover_image
+    }
   }
 `;
 
 const Container = styled.div`
-  height: 100vh;
   background-image: linear-gradient(-45deg, #d754ab, #fd723a);
   width: 100%;
+  height: 100%;
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-around;
   align-items: center;
   color: white;
@@ -46,7 +51,7 @@ const Description = styled.p`
 
 const Poster = styled.div`
   width: 25%;
-  height: 60%;
+  height: 60vh;
   background-color: transparent;
   background-image: url(${(props) => props.bg});
   background-size: cover;
@@ -58,22 +63,20 @@ const Detail = () => {
   const { loading, data } = useQuery(GET_MOVIE, {
     variables: { id: +id },
   });
+  console.log(data);
   return (
     <Container>
       <Column>
         <Title>{loading ? "Loading..." : data.movie.title}</Title>
-        {!loading && data.movie && (
-          <>
-            <Subtitle>
-              {data.movie.language} · {data.movie.rating}
-            </Subtitle>
-            <Description>{data.movie.description_full}</Description>
-          </>
-        )}
+        <Subtitle>
+          {data?.movie?.language} · {data?.movie?.rating}
+        </Subtitle>
+        <Description>{data?.movie?.description_full}</Description>
       </Column>
-      <Poster
-        bg={data && data.movie ? data.movie.medium_cover_image : ""}
-      ></Poster>
+      <Poster bg={data?.movie?.medium_cover_image}></Poster>
+      {data?.suggestionMovies?.map((suggestion) => (
+        <Poster key={suggestion.id} bg={suggestion.medium_cover_image}></Poster>
+      ))}
     </Container>
   );
 };
